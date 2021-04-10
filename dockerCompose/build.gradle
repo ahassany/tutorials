@@ -14,6 +14,21 @@ configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
+    integrationTestImplementation.extendsFrom implementation
+    integrationTestImplementation.extendsFrom testImplementation
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+
+sourceSets {
+    integrationTest {
+        java {
+            srcDir "src/integration/java"
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+        }
+        resources.srcDir file("src/integration/resources")
+    }
 }
 
 repositories {
@@ -32,10 +47,28 @@ test {
     useJUnitPlatform()
 }
 
-// Define the docker compose file
-dockerCompose {
-    useComposeFiles = ['src/main/resources/docker-compose.yml']
+
+task integrationTest(type: Test) {
+    group 'Test'
+    useJUnitPlatform()
+    mustRunAfter test
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
 }
 
-// Specify that bootRun depends on dockerCompose
-dockerCompose.isRequiredBy(bootRun)
+check.dependsOn integrationTest
+
+// Define the docker compose file
+dockerCompose {
+    dev {
+        // Specify that bootRun depends on dockerCompose
+        useComposeFiles = ["${buildDir}/resources/main/docker-compose.yml"]
+        isRequiredBy(bootRun)
+    }
+    integration {
+        // Define the docker compose file for integration testing
+        useComposeFiles = ["${buildDir}/resources/integrationTest/docker-compose.yml"]
+        isRequiredBy(integrationTest)
+    }
+}
+
