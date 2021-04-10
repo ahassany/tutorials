@@ -1,6 +1,7 @@
 package ps.hassany.tutorial.dockerCompose;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,7 +27,8 @@ public class ControllerTest {
   private PersonEntity testPerson1;
   private PersonEntity testPerson2;
 
-  public ControllerTest() {
+  @BeforeEach
+  public void init() {
     testPerson1 = new PersonEntity(1L, "Person1");
     testPerson2 = new PersonEntity(2L, "Person2");
   }
