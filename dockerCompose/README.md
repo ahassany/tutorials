@@ -2,6 +2,7 @@
 
 This simple example demonstrates connecting a simple Spring Boot application to a Neo4j instance via docker compose. We
 use two different docker compose specs: one for dev and another to run the integration tests.
+See the [blog post](https://ahassany.medium.com/automatically-launch-docker-compose-from-gradle-for-dev-and-integration-tests-4a63b78ad7a1) for more details.
 
 ## Running the dev application
 
