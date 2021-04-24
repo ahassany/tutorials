@@ -1,5 +1,6 @@
 package ps.hassany.kafka.tutorial.producer;
 
+import io.vavr.CheckedFunction1;
 import ps.hassany.kafka.tutorial.common.Message;
 
 import java.io.IOException;
@@ -7,18 +8,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-public class FileMessagesReader implements StreamingMessagesReader<String, String> {
+public class FileMessagesReader<K, V> implements StreamingMessagesReader<K, V> {
   private final Path inputFile;
-  private final StringMessageParser stringMessageParser;
+  private final MessageLineParser<K, V> messageLineParser;
 
-  public FileMessagesReader(Path inputFile, StringMessageParser stringMessageParser) {
+  public FileMessagesReader(Path inputFile, MessageLineParser<K, V> messageLineParser) {
     this.inputFile = inputFile;
-    this.stringMessageParser = stringMessageParser;
+    this.messageLineParser = messageLineParser;
   }
 
   @Override
-  public Stream<Message<String, String>> streamMessages() throws IOException {
+  public Stream<Message<K, V>> streamMessages() throws IOException {
     Stream<String> linesStream = Files.lines(inputFile);
-    return linesStream.filter(l -> !l.trim().isEmpty()).map(stringMessageParser::parseMessage);
+    CheckedFunction1<String, Message<K, V>> f = x -> messageLineParser.parseMessage(x);
+    return linesStream.filter(l -> !l.trim().isEmpty()).map(f.unchecked());
   }
 }

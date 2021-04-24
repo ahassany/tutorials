@@ -16,17 +16,21 @@ public class KafkaProducerApplication {
             appConfig.getOutTopic(),
             Optional.of(
                 (recordMetadata, exception) -> {
-                  System.out.printf(
-                      "Callback: Offset: %d, Partition: %d, Exception: %s%s",
-                      recordMetadata.partition(),
-                      recordMetadata.offset(),
-                      exception == null ? "None" : exception.getMessage(),
-                      System.lineSeparator());
+                  if (exception != null) {
+                    System.out.println("Exception: " + exception.getMessage());
+                    exception.printStackTrace(System.err);
+                  } else {
+                    System.out.printf(
+                        "Callback: Partition: %d, Offset: %d, Exception: None%s",
+                        recordMetadata.partition(),
+                        recordMetadata.offset(),
+                        System.lineSeparator());
+                  }
                 }));
     final StringMessageParser stringMessageParser =
         new StringMessageParser(appConfig.getMessageDelimiter(), appConfig.getDefaultKey());
-    StreamingMessagesReader messagesReader =
-        new FileMessagesReader(appConfig.getMessagesFilePath(), stringMessageParser);
+    StreamingMessagesReader<String, String> messagesReader =
+        new FileMessagesReader<>(appConfig.getMessagesFilePath(), stringMessageParser);
     final MessagesProcessor<String, String> messagesProcessor =
         new MessagesProcessor<>(tutorialProducer, messagesReader);
     try {

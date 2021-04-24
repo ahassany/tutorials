@@ -4,7 +4,7 @@ import ps.hassany.kafka.tutorial.common.Message;
 
 import java.util.Arrays;
 
-public class StringMessageParser {
+public class StringMessageParser implements MessageLineParser<String, String> {
   private final String delimiter;
   private final String defaultKey;
 
