@@ -1,5 +1,6 @@
 package ps.hassany.kafka.tutorial.consumer;
 
+import io.confluent.developer.avro.Publication;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import ps.hassany.kafka.tutorial.common.Message;
@@ -30,6 +31,27 @@ public class ConsumerApplication {
     }
   }
 
+  public static void runAvroApp(ConsumerApplicationConfig appConfig) {
+    ConsumerRecordsHandler<Integer, Publication, List<Message<Integer, Publication>>>
+        consumerRecordsHandler =
+            (x) ->
+                StreamSupport.stream(x.spliterator(), false)
+                    .map((r) -> new Message<>(r.key(), r.value()))
+                    .collect(Collectors.toList());
+    Consumer<Integer, Publication> kafkaConsumer =
+        new KafkaConsumer<>(appConfig.getKafkaConsumerProperties());
+    TutorialConsumer<Integer, Publication> tutorialConsumer =
+        new TutorialConsumer<>(
+            kafkaConsumer, appConfig.getInputTopic(), appConfig.getPollTimeoutDuration());
+    Runtime.getRuntime().addShutdownHook(new Thread(tutorialConsumer::close));
+    try (var topicStream = tutorialConsumer.runConsume()) {
+      topicStream
+          .map(consumerRecordsHandler::process)
+          .limit(1)
+          .forEach((x) -> x.forEach(y -> System.out.println(y.getKey() + " : " + y.getValue())));
+    }
+  }
+
   public static void main(String[] args) {
     final ConsumerApplicationConfig appConfig;
     try {
@@ -38,6 +60,6 @@ public class ConsumerApplication {
       System.err.printf("Couldn't load properties: %s", exception.getMessage());
       return;
     }
-    runApp(appConfig);
+    runAvroApp(appConfig);
   }
 }
