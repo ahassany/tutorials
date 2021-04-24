@@ -1,5 +1,7 @@
 package ps.hassany.kafka.tutorial.producer;
 
+import ps.hassany.kafka.tutorial.common.Message;
+
 import java.util.Arrays;
 
 public class StringMessageParser {

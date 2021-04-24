@@ -1,6 +1,7 @@
 package ps.hassany.kafka.tutorial.producer;
 
 import org.apache.kafka.clients.producer.RecordMetadata;
+import ps.hassany.kafka.tutorial.common.Message;
 
 import java.io.IOException;
 import java.util.List;

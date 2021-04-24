@@ -8,6 +8,9 @@ import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+
+import ps.hassany.kafka.tutorial.common.Message;
+
 public class TutorialProducer<K, V> {
 
   private final Producer<K, V> producer;

@@ -4,6 +4,7 @@ import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ps.hassany.kafka.tutorial.common.Message;
 
 import java.io.IOException;
 import java.util.Arrays;

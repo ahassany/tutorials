@@ -1,5 +1,7 @@
 package ps.hassany.kafka.tutorial.producer;
 
+import ps.hassany.kafka.tutorial.common.Message;
+
 import java.io.IOException;
 import java.util.stream.Stream;
 

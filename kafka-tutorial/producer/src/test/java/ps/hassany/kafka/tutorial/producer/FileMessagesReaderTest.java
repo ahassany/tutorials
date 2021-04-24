@@ -2,6 +2,7 @@ package ps.hassany.kafka.tutorial.producer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ps.hassany.kafka.tutorial.common.Message;
 
 import java.io.IOException;
 import java.util.Arrays;
