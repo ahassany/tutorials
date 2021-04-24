@@ -14,6 +14,7 @@ Just simple application that reads from a Kafka topic and prints the messages to
 The application is configurable with `src/main/resources/app.properties`.
 
 To run the application use: `./gradlew :consumer:run`.
+
 *Notes* 
 - Make sure to run the producer first. This will load the needed Docker image and push some messages to a Kafka topic.
 - Make sure `src/main/resources/app.properties` in producer and consumer apps are pointing to the same topic.
