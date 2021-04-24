@@ -1,9 +1,9 @@
 package ps.hassany.kafka.tutorial.producer;
 
 import lombok.Data;
+import ps.hassany.kafka.tutorial.common.PropertiesClassPathLoader;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -17,20 +17,10 @@ public class ProducerApplicationConfig {
   private final String messageDelimiter;
   private final String defaultKey;
 
-  public static Properties loadProperties(final String propertiesFilename) throws IOException {
-    final Properties properties = new Properties();
-    var configURL = KafkaProducerApplication.class.getClassLoader().getResource(propertiesFilename);
-    assert configURL != null;
-    try (InputStream inputStream = configURL.openStream()) {
-      properties.load(inputStream);
-    }
-    return properties;
-  }
-
   public static ProducerApplicationConfig build(final String appProperties) throws IOException {
-    var applicationProperties = ProducerApplicationConfig.loadProperties(appProperties);
+    var applicationProperties = PropertiesClassPathLoader.loadProperties(appProperties);
     final Properties kafkaProducerProperties =
-        ProducerApplicationConfig.loadProperties(
+        PropertiesClassPathLoader.loadProperties(
             applicationProperties.getProperty("kafka.producer.properties.file"));
     final String outputTopic = applicationProperties.getProperty("output.topic.name");
     final String messageDelimiter = applicationProperties.getProperty("message.delimiter");
