@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 @Data
-public class Config {
+public class ProducerApplicationConfig {
   private final Properties kakfaProducerProperties;
   private final String outTopic;
   private final Path messagesFilePath;
@@ -27,20 +27,22 @@ public class Config {
     return properties;
   }
 
-  public static Config build(final String appProperties) throws IOException {
-    var props = Config.loadProperties(appProperties);
+  public static ProducerApplicationConfig build(final String appProperties) throws IOException {
+    var applicationProperties = ProducerApplicationConfig.loadProperties(appProperties);
     final Properties kafkaProducerProperties =
-        Config.loadProperties(props.getProperty("kafkaProducerPropertiesFile"));
-    final String outputTopic = kafkaProducerProperties.getProperty("output.topic.name");
-    final String messageDelimiter = props.getProperty("messageDelimiter");
-    final String defaultKey = props.getProperty("defaultKey");
-    final String messagesFile = props.getProperty("messagesFile");
+        ProducerApplicationConfig.loadProperties(
+            applicationProperties.getProperty("kafka.producer.properties.file"));
+    final String outputTopic = applicationProperties.getProperty("output.topic.name");
+    final String messageDelimiter = applicationProperties.getProperty("message.delimiter");
+    final String defaultKey = applicationProperties.getProperty("default.key");
+    final String messagesFile = applicationProperties.getProperty("messages.file");
 
     final Path messageFilePath =
         Paths.get(
-            Objects.requireNonNull(Config.class.getClassLoader().getResource(messagesFile))
+            Objects.requireNonNull(
+                    ProducerApplicationConfig.class.getClassLoader().getResource(messagesFile))
                 .getPath());
-    return new Config(
+    return new ProducerApplicationConfig(
         kafkaProducerProperties, outputTopic, messageFilePath, messageDelimiter, defaultKey);
   }
 }

@@ -6,15 +6,15 @@ import java.io.IOException;
 
 public class KafkaProducerApplication {
 
-  public static void runApp(Config config) {
+  public static void runApp(ProducerApplicationConfig appConfig) {
     final KafkaProducer<String, String> kafkaProducer =
-        new KafkaProducer<>(config.getKakfaProducerProperties());
+        new KafkaProducer<>(appConfig.getKakfaProducerProperties());
     final TutorialProducer<String, String> tutorialProducer =
-        new TutorialProducer<>(kafkaProducer, config.getOutTopic());
+        new TutorialProducer<>(kafkaProducer, appConfig.getOutTopic());
     final StringMessageParser stringMessageParser =
-        new StringMessageParser(config.getMessageDelimiter(), config.getDefaultKey());
+        new StringMessageParser(appConfig.getMessageDelimiter(), appConfig.getDefaultKey());
     StreamingMessagesReader messagesReader =
-        new FileMessagesReader(config.getMessagesFilePath(), stringMessageParser);
+        new FileMessagesReader(appConfig.getMessagesFilePath(), stringMessageParser);
     final MessagesProcessor<String, String> messagesProcessor =
         new MessagesProcessor<>(tutorialProducer, messagesReader);
     try {
@@ -27,13 +27,13 @@ public class KafkaProducerApplication {
   }
 
   public static void main(String[] args) {
-    final Config config;
+    final ProducerApplicationConfig producerApplicationConfig;
     try {
-      config = Config.build("app.properties");
+      producerApplicationConfig = ProducerApplicationConfig.build("app.properties");
     } catch (IOException exception) {
       System.err.printf("Couldn't load properties: %s", exception.getMessage());
       return;
     }
-    runApp(config);
+    runApp(producerApplicationConfig);
   }
 }

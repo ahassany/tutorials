@@ -12,24 +12,24 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class FileMessagesReaderTest {
-  private Config config;
+  private ProducerApplicationConfig applicationConfig;
 
   @BeforeEach
   public void init() throws IOException {
-    config = Config.build("app.properties");
+    applicationConfig = ProducerApplicationConfig.build("app.properties");
   }
 
   @Test
   public void test_streamMessages() throws IOException {
     FileMessagesReader fileMessagesReader =
         new FileMessagesReader(
-            config.getMessagesFilePath(),
-            new StringMessageParser(config.getMessageDelimiter(), config.getDefaultKey()));
+            applicationConfig.getMessagesFilePath(),
+            new StringMessageParser(applicationConfig.getMessageDelimiter(), applicationConfig.getDefaultKey()));
     List<Message<String, String>> expected =
         Arrays.asList(
             new Message<>("1", "value"),
             new Message<>("2", "words"),
-            new Message<>(config.getDefaultKey(), "withoutkey"));
+            new Message<>(applicationConfig.getDefaultKey(), "withoutkey"));
     try (Stream<Message<String, String>> messagesStream = fileMessagesReader.streamMessages()) {
       var actual = messagesStream.collect(Collectors.toList());
       assertIterableEquals(expected, actual);
