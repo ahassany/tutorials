@@ -19,11 +19,9 @@ public class MessagesProcessor<K, V> {
     this.messagesReader = messagesReader;
   }
 
-  public void process() throws IOException {
+  public List<Future<RecordMetadata>> process() throws IOException {
     try (Stream<Message<K, V>> valuesStream = messagesReader.streamMessages()) {
-      List<Future<RecordMetadata>> metadata =
-          valuesStream.map(producer::produce).collect(Collectors.toList());
-      producer.printMetadata(metadata);
+      return valuesStream.map(producer::produce).collect(Collectors.toList());
     }
   }
 }
