@@ -3,6 +3,7 @@ package ps.hassany.kafka.tutorial.producer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class KafkaProducerApplication {
 
@@ -10,7 +11,18 @@ public class KafkaProducerApplication {
     final KafkaProducer<String, String> kafkaProducer =
         new KafkaProducer<>(appConfig.getKakfaProducerProperties());
     final TutorialProducer<String, String> tutorialProducer =
-        new TutorialProducer<>(kafkaProducer, appConfig.getOutTopic());
+        new TutorialProducer<>(
+            kafkaProducer,
+            appConfig.getOutTopic(),
+            Optional.of(
+                (recordMetadata, exception) -> {
+                  System.out.printf(
+                      "Callback: Offset: %d, Partition: %d, Exception: %s%s",
+                      recordMetadata.partition(),
+                      recordMetadata.offset(),
+                      exception == null ? "None" : exception.getMessage(),
+                      System.lineSeparator());
+                }));
     final StringMessageParser stringMessageParser =
         new StringMessageParser(appConfig.getMessageDelimiter(), appConfig.getDefaultKey());
     StreamingMessagesReader messagesReader =
