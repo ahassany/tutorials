@@ -2,3 +2,5 @@ rootProject.name = 'kafka-tutorial'
 include 'common'
 include 'producer'
 include 'consumer'
+include 'kstreams-filter-events'
+
