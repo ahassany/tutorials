@@ -3,7 +3,6 @@
   "type": "record",
   "name": "Publication",
   "fields": [
-    {"name": "id", "type": "long"},
     {"name": "name", "type": "string"},
     {"name": "title", "type": "string"}
   ]

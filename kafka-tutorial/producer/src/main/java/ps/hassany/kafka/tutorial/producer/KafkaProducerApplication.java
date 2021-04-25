@@ -42,16 +42,16 @@ public class KafkaProducerApplication {
   }
 
   public static void runAppAvro(ProducerApplicationConfig appConfig) {
-    final KafkaProducer<Long, Publication> kafkaProducer =
+    final KafkaProducer<String, Publication> kafkaProducer =
         new KafkaProducer<>(appConfig.getKakfaProducerProperties());
-    final TutorialProducer<Long, Publication> tutorialProducer =
+    final TutorialProducer<String, Publication> tutorialProducer =
         new TutorialProducer<>(kafkaProducer, appConfig.getOutTopic(), Optional.of(printCallback));
 
-    final JsonToAvroWithKeyMessageParser<Long, Publication> messageParser =
-        new JsonToAvroWithKeyMessageParser<>(Publication.getClassSchema(), "id");
-    StreamingMessagesReader<Long, Publication> messagesReader =
+    final JsonToAvroWithKeyMessageParser<String, Publication> messageParser =
+        new JsonToAvroWithKeyMessageParser<>(Publication.getClassSchema(), "name");
+    StreamingMessagesReader<String, Publication> messagesReader =
         new FileMessagesReader<>(appConfig.getMessagesFilePath(), messageParser);
-    final MessagesProcessor<Long, Publication> messagesProcessor =
+    final MessagesProcessor<String, Publication> messagesProcessor =
         new MessagesProcessor<>(tutorialProducer, messagesReader);
     try {
       messagesProcessor.process();
