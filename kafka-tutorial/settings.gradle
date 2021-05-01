@@ -3,4 +3,5 @@ include 'common'
 include 'producer'
 include 'consumer'
 include 'kstreams-filter-events'
+include 'aggregate-count'
 

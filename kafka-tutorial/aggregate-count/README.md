@@ -1,0 +1,1 @@
+Based on Confluent's [How to count a stream of events](https://kafka-tutorials.confluent.io/create-stateful-aggregation-count/kstreams.html)
