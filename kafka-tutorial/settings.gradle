@@ -4,4 +4,5 @@ include 'producer'
 include 'consumer'
 include 'kstreams-filter-events'
 include 'aggregate-count'
+include 'kstreams-split-stream'
 
