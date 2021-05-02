@@ -22,7 +22,6 @@ repositories {
     }
 }
 
-
 dependencies {
     implementation project(":common")
     implementation "org.apache.avro:avro:1.10.1"
@@ -42,23 +41,21 @@ test {
     useJUnitPlatform()
 }
 
+application {
+    // Define the main class for the application.
+    mainClass = 'ps.hassany.kafka.tutorial.kstreams.distinct.FindDistinctEventsApplication'
+}
 
 task createTopics(type: JavaExec) {
-    main = 'ps.hassany.kafka.tutorial.kstreams.split.helpers.CreateTopics'
+    main = 'ps.hassany.kafka.tutorial.kstreams.distinct.helpers.CreateTopics'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 
 task publishSchemas(type: JavaExec) {
-    main = 'ps.hassany.kafka.tutorial.kstreams.split.helpers.RegisterSchemas'
+    main = 'ps.hassany.kafka.tutorial.kstreams.distinct.helpers.RegisterSchemas'
     classpath = sourceSets.main.runtimeClasspath
 }
-
-application {
-    // Define the main class for the application.
-    mainClass = 'ps.hassany.kafka.tutorial.kstreams.split.SplitStreamApplication'
-}
-
 
 run.dependsOn {
     [createTopics, publishSchemas]

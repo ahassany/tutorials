@@ -5,4 +5,5 @@ include 'consumer'
 include 'kstreams-filter-events'
 include 'aggregate-count'
 include 'kstreams-split-stream'
+include 'kstreams-find-distinct-events'
 
