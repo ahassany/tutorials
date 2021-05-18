@@ -25,37 +25,38 @@ public class TopicCreation {
     return new NewTopic(topicName, partitions, replicationFactor);
   }
 
-  public void createTopics(
-      final String bootstrapServers, final Collection<TopicsCreationConfig> configs)
+  private Map<String, NewTopic> onlyNewTopics(final Collection<TopicsCreationConfig> configs)
       throws InterruptedException, ExecutionException {
-    Map<String, NewTopic> topics;
-
     var existingTopicsResults = adminClient.listTopics();
     var existingTopicsNames = existingTopicsResults.names().get();
+    return configs.stream()
+        .filter(
+            (config) -> {
+              if (existingTopicsNames.contains(config.getTopicName())) {
+                logger.info(
+                    String.format(
+                        "Skip creating topic %s since it already exists", config.getTopicName()));
+                return false;
+              }
+              return true;
+            })
+        .collect(
+            Collectors.toMap(
+                TopicsCreationConfig::getTopicName,
+                config -> {
+                  var newTopic =
+                      new NewTopic(
+                          config.getTopicName(),
+                          config.getTopicPartitions(),
+                          config.getTopicReplicationFactor());
+                  return config.getConfigs().map(x -> newTopic.configs(x)).orElse(newTopic);
+                },
+                (a, b) -> b));
+  }
 
-    topics =
-        configs.stream()
-            .filter(
-                (config) -> {
-                  if (existingTopicsNames.contains(config.getTopicName())) {
-                    logger.info(
-                        String.format(
-                            "Skip creating topic %s since it already exists",
-                            config.getTopicName()));
-                    return false;
-                  }
-                  return true;
-                })
-            .collect(
-                Collectors.toMap(
-                    TopicsCreationConfig::getTopicName,
-                    config ->
-                        new NewTopic(
-                            config.getTopicName(),
-                            config.getTopicPartitions(),
-                            config.getTopicReplicationFactor()),
-                    (a, b) -> b));
-
+  public void createTopics(final Collection<TopicsCreationConfig> configs)
+      throws InterruptedException, ExecutionException {
+    var topics = onlyNewTopics(configs);
     var result = adminClient.createTopics(topics.values());
     result
         .values()

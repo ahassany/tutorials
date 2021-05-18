@@ -30,6 +30,6 @@ public class CreateTopics {
                 config.getOutputTopicPartitions(),
                 config.getOutputTopicReplicationFactor()));
     TopicCreation topicCreation = new TopicCreation(adminClient);
-    topicCreation.createTopics(config.getBootstrapServers(), topicConfigs);
+    topicCreation.createTopics(topicConfigs);
   }
 }
