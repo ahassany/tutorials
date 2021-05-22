@@ -61,6 +61,7 @@ public class KStreamToKTableApplication {
   public static void main(String[] args) throws Exception {
     Properties props = PropertiesClassPathLoader.loadProperties("dev.properties");
     KStreamToKTableConfig config = KStreamToKTableConfig.build(props);
+    System.err.println("Registry URL: " + config.getSchemaRegistryURL());
 
     var topology = buildTopology(config);
     Properties streamProps = buildStreamsProperties(config);
