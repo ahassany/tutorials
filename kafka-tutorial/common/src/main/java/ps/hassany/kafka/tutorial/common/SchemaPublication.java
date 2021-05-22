@@ -21,12 +21,12 @@ public class SchemaPublication {
   public void registerValueSchema(String topicName, Schema schema)
       throws RestClientException, IOException {
     logger.info(String.format("Registering value schema for topic: %s", topicName));
-    schemaRegistryClient.register(String.format("%s-value", topicName), new AvroSchema(schema));
+    schemaRegistryClient.register(String.format("%s-value", topicName), schema);
   }
 
   public void registerKeySchema(String topicName, Schema schema)
       throws RestClientException, IOException {
     logger.info(String.format("Registering key schema for topic: %s", topicName));
-    schemaRegistryClient.register(String.format("%s-key", topicName), new AvroSchema(schema));
+    schemaRegistryClient.register(String.format("%s-key", topicName), schema);
   }
 }
