@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.22.0"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://packages.confluent.io/maven"
+    }
+}
+
+apply plugin: "com.commercehub.gradle.plugin.avro"
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    implementation "org.apache.avro:avro:1.10.1"
+    implementation "io.confluent:kafka-streams-avro-serde:6.1.0"
+    implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testCompileOnly 'org.projectlombok:lombok:1.18.20'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}

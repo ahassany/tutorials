@@ -1,0 +1,24 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.payload",
+  "type": "record",
+  "name": "Order",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "orderTimestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "itemsCount",
+      "type": "int"
+    },
+    {
+      "name": "totalPrice",
+      "type": "double"
+    }
+  ]
+}

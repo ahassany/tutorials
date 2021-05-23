@@ -1,0 +1,4 @@
+rootProject.name = 'consistent-graph'
+include 'common'
+include 'orders-generator'
+

@@ -1,0 +1,15 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.payload",
+  "name": "Customer",
+  "type": "record",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "address",
+      "type": "string"
+    }
+  ]
+}

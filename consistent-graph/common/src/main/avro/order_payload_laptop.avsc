@@ -1,0 +1,19 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.payload",
+  "name": "Laptop",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "price",
+      "type": "double"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders",
+  "name": "BookOrder",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "isbn",
+      "type": "string"
+    }
+  ]
+}

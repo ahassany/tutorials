@@ -1,0 +1,37 @@
+{
+  "namespace": "ps.hassany.consistent.graph.domain",
+  "type": "record",
+  "name": "Node",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "producer",
+      "type": "string"
+    },
+    {
+      "name": "payloadType",
+      "type": {
+        "type": "enum",
+        "name": "NodePayloadType",
+        "symbols": [
+          "Order",
+          "Customer",
+          "Book",
+          "Laptop"
+        ]
+      }
+    },
+    {
+      "name": "payload",
+      "type": [
+        "ps.hassany.consistent.graph.orders.Order",
+        "ps.hassany.consistent.graph.orders.CustomerOrder",
+        "ps.hassany.consistent.graph.orders.BookOrder",
+        "ps.hassany.consistent.graph.orders.LaptopOrder"
+      ]
+    }
+  ]
+}
