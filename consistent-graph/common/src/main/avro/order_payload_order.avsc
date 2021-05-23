@@ -1,7 +1,7 @@
 {
   "namespace": "ps.hassany.consistent.graph.orders.payload",
   "type": "record",
-  "name": "Order",
+  "name": "OrderNodePayload",
   "fields": [
     {
       "name": "id",

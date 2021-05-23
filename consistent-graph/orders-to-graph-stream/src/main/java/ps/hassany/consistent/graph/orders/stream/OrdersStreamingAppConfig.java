@@ -1,4 +1,4 @@
-package ps.hassany.consistent.graph.orders;
+package ps.hassany.consistent.graph.orders.stream;
 
 import lombok.Data;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 @Data
-public class OrdersGeneratorAppConfig {
+public class OrdersStreamingAppConfig {
   private final Properties kakfaProducerProperties;
   private final String bootstrapServers;
   private final String applicationId;
@@ -25,7 +25,7 @@ public class OrdersGeneratorAppConfig {
   private final int ordersRelationsTopicPartitions;
   private final short ordersRelationsTopicReplicationFactor;
 
-  public static OrdersGeneratorAppConfig build(Properties props) throws IOException {
+  public static OrdersStreamingAppConfig build(Properties props) throws IOException {
     final Properties kafkaProducerProperties =
         PropertiesClassPathLoader.loadProperties(
             props.getProperty("kafka.producer.properties.file"));
@@ -52,7 +52,7 @@ public class OrdersGeneratorAppConfig {
     final short ordersRelationsTopicReplicationFactor =
         Short.parseShort(props.getProperty("orders.relations.topic.replication.factor"));
 
-    return new OrdersGeneratorAppConfig(
+    return new OrdersStreamingAppConfig(
         kafkaProducerProperties,
         bootstrapServers,
         applicationId,

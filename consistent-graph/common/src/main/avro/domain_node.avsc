@@ -1,7 +1,7 @@
 {
   "namespace": "ps.hassany.consistent.graph.domain",
   "type": "record",
-  "name": "Node",
+  "name": "DomainNode",
   "fields": [
     {
       "name": "id",
@@ -27,10 +27,10 @@
     {
       "name": "payload",
       "type": [
-        "ps.hassany.consistent.graph.orders.Order",
-        "ps.hassany.consistent.graph.orders.CustomerOrder",
-        "ps.hassany.consistent.graph.orders.BookOrder",
-        "ps.hassany.consistent.graph.orders.LaptopOrder"
+        "ps.hassany.consistent.graph.orders.payload.OrderNodePayload",
+        "ps.hassany.consistent.graph.orders.payload.CustomerNodePayload",
+        "ps.hassany.consistent.graph.orders.payload.BookNodePayload",
+        "ps.hassany.consistent.graph.orders.payload.LaptopNodePayload"
       ]
     }
   ]
