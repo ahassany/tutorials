@@ -1,0 +1,16 @@
+{
+  "name": "Neo4JSink",
+  "config": {
+    "connector.class": "streams.kafka.connect.sink.Neo4jSinkConnector",
+    "topics": "orders-nodes-topic,orders-relations-topic",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://schema-registry:8081",
+    "neo4j.authentication.basic.username": "neo4j",
+    "neo4j.authentication.basic.password": "password",
+    "neo4j.server.uri": "bolt://neo4j:7687",
+    "neo4j.encryption.enabled": "false",
+    "neo4j.topic.cypher.orders-nodes-topic": "WITH event, apoc.map.flatten(event.payload,'_') as payload MERGE (n:Base {id: event.id}) SET n.producer = event.producer, n.payload_type=event.payloadType, n +=payload  WITH n, event CALL apoc.create.addLabels([n], [event.payloadType]) YIELD node as ignoreMe RETURN ignoreMe;",
+    "neo4j.topic.cypher.orders-relations-topic": "MERGE (src:Base{id: event.source}) MERGE (dst:Base{id: event.target}) WITH event, src, dst CALL apoc.merge.relationship.eager(src, event.type, null, {created: datetime()}, dst, {})  YIELD rel RETURN rel;"
+  }
+}

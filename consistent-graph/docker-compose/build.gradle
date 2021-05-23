@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'com.avast.gradle.docker-compose' version "0.14.3"
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task prepareDirs {
+    doLast {
+        mkdir "${buildDir}/resources/main/neo4j"
+        mkdir "${buildDir}/resources/main/neo4j/data"
+        mkdir "${buildDir}/resources/main/connect"
+        mkdir "${buildDir}/resources/main/connect/plugings"
+    }
+}
+// Define the docker compose file
+dockerCompose {
+    // Specify that bootRun depends on dockerCompose
+    useComposeFiles = ["${buildDir}/resources/main/docker-compose.yml"]
+    dockerComposeWorkingDirectory = "${buildDir}"
+    stopContainers = false
+    environment.put "NEO4j_DATA_DIR", "${buildDir}/resources/main/neo4j/data"
+    environment.put "CONNECT_PLUGINGS_DIR", "${buildDir}/resources/main/connect/plugings"
+}
+
+composeUp.dependsOn build
+composeUp.dependsOn project(":docker-compose").prepareDirs
