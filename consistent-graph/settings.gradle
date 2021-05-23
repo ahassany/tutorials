@@ -1,4 +1,5 @@
 rootProject.name = 'consistent-graph'
 include 'common'
 include 'orders-generator'
+include 'orders-to-graph-stream'
 
