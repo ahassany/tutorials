@@ -3,15 +3,16 @@ package ps.hassany.consistent.graph.orders.stream;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import org.apache.kafka.streams.kstream.Produced;
 import ps.hassany.consistent.graph.domain.DomainNode;
 import ps.hassany.consistent.graph.domain.DomainRelation;
 import ps.hassany.consistent.graph.orders.Order;
-import ps.hassany.consistent.graph.orders.stream.mapping.KeyValueMappingSupplier;
 
 import java.util.Map;
 
@@ -46,8 +47,8 @@ public class StreamToGraph {
 
   public Topology buildTopology(
       OrdersStreamingAppConfig config,
-      KeyValueMappingSupplier<String, Order, String, DomainNode> nodesMapper,
-      KeyValueMappingSupplier<String, Order, String, DomainRelation> relationsMapper) {
+      KeyValueMapper<String, Order, Iterable<KeyValue<String, DomainNode>>> nodesMapper,
+      KeyValueMapper<String, Order, Iterable<KeyValue<String, DomainRelation>>> relationsMapper) {
     StreamsBuilder builder = new StreamsBuilder();
     final Serde<String> stringSerde = new Serdes.StringSerde();
     final SpecificAvroSerde<Order> ordersSerde = ordersSerde(config);
@@ -56,11 +57,11 @@ public class StreamToGraph {
     final KStream<String, Order> inputStream =
         builder.stream(config.getOrdersTopicName(), Consumed.with(stringSerde, ordersSerde));
     inputStream
-        .flatMap(nodesMapper::map)
+        .flatMap(nodesMapper)
         .to(config.getOrdersNodesTopicName(), Produced.with(stringSerde, nodeSerde));
 
     inputStream
-        .flatMap(relationsMapper::map)
+        .flatMap(relationsMapper)
         .to(config.getOrdersRelationsTopicName(), Produced.with(stringSerde, relationSerde));
 
     return builder.build();

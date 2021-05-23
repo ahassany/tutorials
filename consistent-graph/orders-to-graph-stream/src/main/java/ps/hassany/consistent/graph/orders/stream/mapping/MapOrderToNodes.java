@@ -1,6 +1,7 @@
 package ps.hassany.consistent.graph.orders.stream.mapping;
 
 import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.kstream.KeyValueMapper;
 import ps.hassany.consistent.graph.domain.DomainNode;
 import ps.hassany.consistent.graph.domain.NodePayloadType;
 import ps.hassany.consistent.graph.orders.BookOrder;
@@ -15,10 +16,11 @@ import ps.hassany.consistent.graph.orders.payload.OrderNodePayload;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MapOrderToNodes implements KeyValueMappingSupplier<String, Order, String, DomainNode> {
+public class MapOrderToNodes
+    implements KeyValueMapper<String, Order, Iterable<KeyValue<String, DomainNode>>> {
 
   @Override
-  public List<KeyValue<String, DomainNode>> map(String key, Order order) {
+  public Iterable<KeyValue<String, DomainNode>> apply(String key, Order order) {
     List<KeyValue<String, DomainNode>> nodes = new LinkedList<>();
     String orderId = OrderMappingUtils.getOrderId(order);
     DomainNode orderNode =
