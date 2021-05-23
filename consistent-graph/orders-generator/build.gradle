@@ -35,5 +35,5 @@ test {
 
 application {
     // Define the main class for the application.
-    mainClass = 'ps.hassany.consistent.graph.OrdersGeneratorApplication'
+    mainClass = 'ps.hassany.consistent.graph.orders.OrdersGeneratorApplication'
 }

@@ -1,4 +1,4 @@
-package ps.hassany.consistent.graph;
+package ps.hassany.consistent.graph.orders;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import org.apache.kafka.clients.admin.AdminClient;

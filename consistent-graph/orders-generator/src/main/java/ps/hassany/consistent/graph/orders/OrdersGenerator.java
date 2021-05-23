@@ -1,4 +1,4 @@
-package ps.hassany.consistent.graph;
+package ps.hassany.consistent.graph.orders;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
@@ -14,7 +14,6 @@ import ps.hassany.consistent.graph.common.TopicCreation;
 import ps.hassany.consistent.graph.common.TopicsCreationConfig;
 import ps.hassany.consistent.graph.graph.Node;
 import ps.hassany.consistent.graph.graph.Relation;
-import ps.hassany.consistent.graph.orders.*;
 
 import java.io.IOException;
 import java.util.*;

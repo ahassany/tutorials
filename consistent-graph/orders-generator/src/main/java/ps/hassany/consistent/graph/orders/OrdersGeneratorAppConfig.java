@@ -1,4 +1,4 @@
-package ps.hassany.consistent.graph;
+package ps.hassany.consistent.graph.orders;
 
 import lombok.Data;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
