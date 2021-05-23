@@ -1,0 +1,19 @@
+{
+  "namespace": "ps.hassany.consistent.graph.domain",
+  "type": "record",
+  "name": "DomainRelation",
+  "fields": [
+    {
+      "name": "source",
+      "type": "string"
+    },
+    {
+      "name": "type",
+      "type": "string"
+    },
+    {
+      "name": "target",
+      "type": "string"
+    }
+  ]
+}
