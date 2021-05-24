@@ -1,0 +1,10 @@
+{
+  "namespace": "ps.hassany.consistent.graph",
+  "name": "NodeState",
+  "type": "enum",
+  "symbols": [
+    "Created",
+    "Updated",
+    "Deleted"
+  ]
+}

@@ -12,6 +12,10 @@
       "type": "string"
     },
     {
+      "name": "state",
+      "type": "ps.hassany.consistent.graph.NodeState"
+    },
+    {
       "name": "payloadType",
       "type": {
         "type": "enum",

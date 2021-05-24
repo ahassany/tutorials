@@ -1,3 +1,12 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.commercehub.gradle.plugin:gradle-avro-plugin:0.22.0"
+    }
+}
+
 plugins {
     id 'java'
     id 'ps.hassany.consistent.graph.java-application-conventions'
@@ -12,12 +21,16 @@ repositories {
         url "https://packages.confluent.io/maven"
     }
 }
+
+apply plugin: "com.commercehub.gradle.plugin.avro"
+
 dependencies {
     implementation project(":common")
     implementation "org.apache.avro:avro:1.10.1"
     implementation "org.slf4j:slf4j-simple:1.7.30"
     implementation "org.apache.kafka:kafka-streams:2.7.0"
     implementation "io.confluent:kafka-streams-avro-serde:6.1.0"
+    implementation group: 'io.vavr', name: 'vavr', version: '0.10.3'
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
     testCompileOnly 'org.projectlombok:lombok:1.18.20'

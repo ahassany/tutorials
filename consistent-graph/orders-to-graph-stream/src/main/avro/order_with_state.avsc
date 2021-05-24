@@ -1,0 +1,58 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.internal",
+  "type": "record",
+  "name": "OrderWithState",
+  "fields": [
+    {
+      "name": "state",
+      "type": "ps.hassany.consistent.graph.orders.internal.OrderState"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "orderTimestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "customer",
+      "type": "ps.hassany.consistent.graph.orders.internal.CustomerOrderWithState"
+    },
+    {
+      "name": "orderedItems",
+      "type": {
+        "type": "array",
+        "items": {
+          "name": "OrderedItem",
+          "type": "record",
+          "fields": [
+            {
+              "name": "itemType",
+              "type": {
+                "name": "OrderedItemType",
+                "type": "enum",
+                "symbols": [
+                  "book",
+                  "laptop"
+                ]
+              }
+            },
+            {
+              "name": "price",
+              "type": "double"
+            },
+            {
+              "name": "details",
+              "type": [
+                "ps.hassany.consistent.graph.orders.internal.BookOrderWithState",
+                "ps.hassany.consistent.graph.orders.internal.LaptopOrderWithState"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

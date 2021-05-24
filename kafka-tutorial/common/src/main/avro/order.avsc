@@ -1,0 +1,56 @@
+{
+  "namespace": "ps.hassany.tutorial.order",
+  "type": "record",
+  "name": "Order",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "orderTimestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "customer",
+      "type": "ps.hassany.tutorial.order.CustomerOrder"
+    },
+    {
+      "name": "orderedItems",
+      "type": {
+        "type": "array",
+        "items":
+          {
+            "name": "OrderedItem",
+            "type": "record",
+            "fields": [
+              {
+                "name": "itemType",
+                "type": {
+                  "name": "OrderedItemType",
+                  "type": "enum",
+                  "symbols": [
+                    "book",
+                    "laptop"
+                  ]
+                }
+              },
+              {
+                "name": "price",
+                "type": "double"
+              },
+              {
+                "name": "details",
+                "type": [
+                  "ps.hassany.tutorial.order.BookOrder",
+                  "ps.hassany.tutorial.order.LaptopOrder"
+                ]
+              }
+            ]
+          }
+
+      }
+    }
+  ]
+}

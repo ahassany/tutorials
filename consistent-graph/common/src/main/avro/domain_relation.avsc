@@ -4,6 +4,10 @@
   "name": "DomainRelation",
   "fields": [
     {
+      "name": "state",
+      "type": "ps.hassany.consistent.graph.NodeState"
+    },
+    {
       "name": "source",
       "type": "string"
     },

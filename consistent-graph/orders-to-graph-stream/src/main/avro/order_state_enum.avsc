@@ -1,0 +1,10 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.internal",
+  "name": "OrderState",
+  "type": "enum",
+  "symbols": [
+    "Created",
+    "Updated",
+    "Deleted"
+  ]
+}
