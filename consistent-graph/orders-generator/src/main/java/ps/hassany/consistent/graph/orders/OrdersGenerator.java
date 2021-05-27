@@ -1,24 +1,15 @@
 package ps.hassany.consistent.graph.orders;
 
-import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
-import io.confluent.kafka.schemaregistry.client.rest.exceptions.RestClientException;
-import org.apache.avro.Schema;
-import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.producer.Callback;
-import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ps.hassany.consistent.graph.common.SchemaPublication;
-import ps.hassany.consistent.graph.common.TopicCreation;
-import ps.hassany.consistent.graph.common.TopicsCreationConfig;
-import ps.hassany.consistent.graph.domain.DomainNode;
-import ps.hassany.consistent.graph.domain.DomainRelation;
-import ps.hassany.consistent.graph.graph.Node;
-import ps.hassany.consistent.graph.graph.Relation;
 
-import java.io.IOException;
-import java.util.*;
+import java.time.Clock;
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
@@ -26,8 +17,8 @@ public class OrdersGenerator {
 
   private static final Logger logger = LoggerFactory.getLogger(OrdersGenerator.class);
   private final OrdersGeneratorAppConfig appConfig;
-  private final AdminClient adminClient;
-  private final CachedSchemaRegistryClient schemaRegistryClient;
+  private final Producer<String, Order> kafkaProducer;
+  private final Random random;
   private final Callback printCallback =
       (recordMetadata, exception) -> {
         if (exception != null) {
@@ -43,53 +34,15 @@ public class OrdersGenerator {
 
   public OrdersGenerator(
       OrdersGeneratorAppConfig appConfig,
-      AdminClient adminClient,
-      CachedSchemaRegistryClient schemaRegistryClient) {
+      final Producer<String, Order> kafkaProducer,
+      final Random random) {
     this.appConfig = appConfig;
-    this.adminClient = adminClient;
-    this.schemaRegistryClient = schemaRegistryClient;
+    this.kafkaProducer = kafkaProducer;
+    this.random = random;
   }
 
-  public void createTopics() throws ExecutionException, InterruptedException {
-    List<TopicsCreationConfig> topicConfigs =
-        List.of(
-            new TopicsCreationConfig(
-                appConfig.getOrdersTopicName(),
-                appConfig.getOrdersTopicPartitions(),
-                appConfig.getOrdersTopicReplicationFactor()),
-            new TopicsCreationConfig(
-                appConfig.getOrdersNodesTopicName(),
-                appConfig.getOrdersNodesTopicPartitions(),
-                appConfig.getOrdersNodesTopicReplicationFactor(),
-                Optional.of(Map.of("cleanup.policy", "compact"))),
-            new TopicsCreationConfig(
-                appConfig.getOrdersRelationsTopicName(),
-                appConfig.getOrdersRelationsTopicPartitions(),
-                appConfig.getOrdersRelationsTopicReplicationFactor(),
-                Optional.of(Map.of("cleanup.policy", "compact"))));
-    TopicCreation topicCreation = new TopicCreation(adminClient);
-    topicCreation.createTopics(topicConfigs);
-  }
-
-  public void registerSchemas() throws RestClientException, IOException {
-
-    var stringSchema = Schema.create(Schema.Type.STRING);
-    SchemaPublication schemaPublication = new SchemaPublication(schemaRegistryClient);
-
-    schemaPublication.registerKeySchema(appConfig.getOrdersTopicName(), stringSchema);
-    schemaPublication.registerValueSchema(appConfig.getOrdersTopicName(), Order.SCHEMA$);
-
-    schemaPublication.registerKeySchema(appConfig.getOrdersNodesTopicName(), stringSchema);
-    schemaPublication.registerValueSchema(appConfig.getOrdersNodesTopicName(), DomainNode.SCHEMA$);
-
-    schemaPublication.registerKeySchema(appConfig.getOrdersRelationsTopicName(), stringSchema);
-    schemaPublication.registerValueSchema(
-        appConfig.getOrdersRelationsTopicName(), DomainRelation.SCHEMA$);
-  }
-
-  public static Order newOrder(
+  public Order newOrder(
       int customerRandomBound, int addressRandomBound, int bookRandomBound, int laptopRandomBound) {
-    var random = new Random();
     var bookBuilder = BookOrder.newBuilder();
     var laptopBuilder = LaptopOrder.newBuilder();
     var orderItemsBuilder = OrderedItem.newBuilder();
@@ -111,7 +64,7 @@ public class OrdersGenerator {
         bookBuilder
             .setId("book" + bookNumber)
             .setName("Book " + bookNumber)
-            .setIsbn("isbn" + bookNumber)
+            .setIsbn("isbn:" + bookNumber)
             .build();
 
     var laptop =
@@ -132,17 +85,14 @@ public class OrdersGenerator {
 
     return orderBuilder
         .setId(UUID.randomUUID().toString())
-        .setOrderTimestamp(System.currentTimeMillis())
+        .setOrderTimestamp(Clock.systemDefaultZone().millis())
         .setCustomer(customer)
         .setOrderedItems(List.of(orderedItem1, orderedItem2))
         .build();
   }
 
   public void produce(int numOrders) {
-    final KafkaProducer<String, Order> kafkaProducer =
-        new KafkaProducer<>(appConfig.getKakfaProducerProperties());
-
-    IntStream.range(0, numOrders + 1)
+    IntStream.range(0, numOrders)
         .mapToObj(
             x -> {
               var order = newOrder(10, 100, 10, 2);
