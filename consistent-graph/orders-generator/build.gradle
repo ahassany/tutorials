@@ -36,6 +36,11 @@ test {
 }
 
 
+task trim(type: JavaExec) {
+    main = 'ps.hassany.consistent.graph.orders.TrimOrderApplication'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 task delete(type: JavaExec) {
     main = 'ps.hassany.consistent.graph.orders.DeleteOrderApplication'
     classpath = sourceSets.main.runtimeClasspath

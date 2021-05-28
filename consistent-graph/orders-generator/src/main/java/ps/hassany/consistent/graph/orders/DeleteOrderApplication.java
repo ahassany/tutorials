@@ -27,7 +27,7 @@ public class DeleteOrderApplication {
   }
 
   public static void main(String[] args) throws Exception {
-    // Default 10 orders
+    // Default 1 orders
     int numOrders = 1;
     if (args.length > 0) {
       numOrders = Integer.parseInt(args[0]);
