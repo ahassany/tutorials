@@ -1,6 +1,7 @@
 package ps.hassany.consistent.graph.orders;
 
 import lombok.Data;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
 
 import java.io.IOException;
@@ -9,6 +10,7 @@ import java.util.Properties;
 @Data
 public class OrdersGeneratorAppConfig {
   private final Properties kakfaProducerProperties;
+  private final Properties kakfaConsumerProperties;
   private final String bootstrapServers;
   private final String applicationId;
   private final String schemaRegistryURL;
@@ -29,6 +31,13 @@ public class OrdersGeneratorAppConfig {
     final Properties kafkaProducerProperties =
         PropertiesClassPathLoader.loadProperties(
             props.getProperty("kafka.producer.properties.file"));
+    final Properties KafkaConsumerProperties =
+        PropertiesClassPathLoader.loadProperties(
+            props.getProperty("kafka.consumer.properties.file"));
+
+    KafkaConsumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "orders.delete");
+    KafkaConsumerProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, "orders.delete.client");
+    KafkaConsumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
     final String bootstrapServers = props.getProperty("bootstrap.servers");
     final String schemaRegistryURL = props.getProperty("schema.registry.url");
@@ -54,6 +63,7 @@ public class OrdersGeneratorAppConfig {
 
     return new OrdersGeneratorAppConfig(
         kafkaProducerProperties,
+        KafkaConsumerProperties,
         bootstrapServers,
         applicationId,
         schemaRegistryURL,
