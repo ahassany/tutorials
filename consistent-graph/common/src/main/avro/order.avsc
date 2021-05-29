@@ -20,36 +20,34 @@
       "name": "orderedItems",
       "type": {
         "type": "array",
-        "items":
-          {
-            "name": "OrderedItem",
-            "type": "record",
-            "fields": [
-              {
-                "name": "itemType",
-                "type": {
-                  "name": "OrderedItemType",
-                  "type": "enum",
-                  "symbols": [
-                    "book",
-                    "laptop"
-                  ]
-                }
-              },
-              {
-                "name": "price",
-                "type": "double"
-              },
-              {
-                "name": "details",
-                "type": [
-                  "ps.hassany.consistent.graph.orders.BookOrder",
-                  "ps.hassany.consistent.graph.orders.LaptopOrder"
+        "items": {
+          "name": "OrderedItem",
+          "type": "record",
+          "fields": [
+            {
+              "name": "itemType",
+              "type": {
+                "name": "OrderedItemType",
+                "type": "enum",
+                "symbols": [
+                  "book",
+                  "laptop"
                 ]
               }
-            ]
-          }
-
+            },
+            {
+              "name": "price",
+              "type": "double"
+            },
+            {
+              "name": "details",
+              "type": [
+                "ps.hassany.consistent.graph.orders.BookOrder",
+                "ps.hassany.consistent.graph.orders.LaptopOrder"
+              ]
+            }
+          ]
+        }
       }
     }
   ]
