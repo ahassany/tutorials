@@ -246,4 +246,18 @@ public class TestUtils {
                     .build()))
         .build();
   }
+
+  public static DLQRecord wrapOrderStateInDLQ(
+      OrderWithState orderWithStateState, long timestamp, boolean isError, String error) {
+    return DLQRecord.newBuilder()
+        .setTimestamp(timestamp)
+        .setIsError(isError)
+        .setError(error)
+        .setOrderWithState(orderWithStateState)
+        .build();
+  }
+
+  public static DLQRecord wrapOrderStateInDLQ(OrderWithState orderWithStateState, long timestamp) {
+    return wrapOrderStateInDLQ(orderWithStateState, timestamp, false, null);
+  }
 }

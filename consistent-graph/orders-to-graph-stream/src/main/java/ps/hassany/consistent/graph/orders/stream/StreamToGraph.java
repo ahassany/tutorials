@@ -16,6 +16,7 @@ import org.apache.kafka.streams.state.WindowStore;
 import ps.hassany.consistent.graph.domain.DomainNode;
 import ps.hassany.consistent.graph.domain.DomainRelation;
 import ps.hassany.consistent.graph.orders.Order;
+import ps.hassany.consistent.graph.orders.internal.DLQRecord;
 import ps.hassany.consistent.graph.orders.internal.OrderWithState;
 import ps.hassany.consistent.graph.orders.stream.mapping.OrderDiffTransformerSupplier;
 
@@ -32,9 +33,10 @@ public class StreamToGraph {
           relationsMapper) {
     StreamsBuilder builder = new StreamsBuilder();
     final Serde<String> stringSerde = new Serdes.StringSerde();
-    final SpecificAvroSerde<Order> ordersSerde = OrderSerdes.ordersSerde(config);
-    final SpecificAvroSerde<DomainNode> nodeSerde = OrderSerdes.nodeSerde(config);
-    final SpecificAvroSerde<DomainRelation> relationSerde = OrderSerdes.relationSerde(config);
+    final SpecificAvroSerde<Order> ordersSerde = OrderSerdes.serde(config);
+    final SpecificAvroSerde<DomainNode> nodeSerde = OrderSerdes.serde(config);
+    final SpecificAvroSerde<DomainRelation> relationSerde = OrderSerdes.serde(config);
+    final SpecificAvroSerde<DLQRecord> dlqSerde = OrderSerdes.serde(config);
 
     final Duration windowSize = Duration.ofMinutes(1);
     final Duration retentionPeriod = windowSize;
@@ -50,10 +52,18 @@ public class StreamToGraph {
     final KStream<String, Order> inputStream =
         builder.stream(config.getOrdersTopicName(), Consumed.with(stringSerde, ordersSerde));
 
+    final KStream<String, DLQRecord>[] orderStateStreams =
+        inputStream
+            .transform(
+                new OrderDiffTransformerSupplier(
+                    ordersStoreName, windowSize.toMillis(), ordersStoreBuilder))
+            .branch((key, value) -> value.getIsError(), (key, value) -> !value.getIsError());
+
+    // DLQ output
+    orderStateStreams[0].to(config.getOrdersDLQTopicName(), Produced.with(stringSerde, dlqSerde));
+
     final KStream<String, OrderWithState> orderStateStream =
-        inputStream.transform(
-            new OrderDiffTransformerSupplier(
-                ordersStoreName, windowSize.toMillis(), ordersStoreBuilder));
+        orderStateStreams[1].map((key, value) -> new KeyValue<>(key, value.getOrderWithState()));
 
     orderStateStream
         .flatMap(nodesMapper)

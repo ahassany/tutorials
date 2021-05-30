@@ -44,7 +44,14 @@ test {
     useJUnitPlatform()
 }
 
+task register(type: JavaExec) {
+    main = 'ps.hassany.consistent.graph.orders.stream.TopicsManagement'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 application {
     // Define the main class for the application.
     mainClass = 'ps.hassany.consistent.graph.orders.stream.OrdersStreamingApplication'
 }
+
+run.dependsOn register

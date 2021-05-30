@@ -6,12 +6,12 @@ import org.apache.kafka.streams.kstream.TransformerSupplier;
 import org.apache.kafka.streams.state.StoreBuilder;
 import org.apache.kafka.streams.state.WindowStore;
 import ps.hassany.consistent.graph.orders.Order;
-import ps.hassany.consistent.graph.orders.internal.*;
+import ps.hassany.consistent.graph.orders.internal.DLQRecord;
 
 import java.util.Set;
 
 public class OrderDiffTransformerSupplier
-    implements TransformerSupplier<String, Order, KeyValue<String, OrderWithState>> {
+    implements TransformerSupplier<String, Order, KeyValue<String, DLQRecord>> {
 
   private final String storeName;
   private final long leftDurationMs;
@@ -29,7 +29,7 @@ public class OrderDiffTransformerSupplier
   }
 
   @Override
-  public Transformer<String, Order, KeyValue<String, OrderWithState>> get() {
+  public Transformer<String, Order, KeyValue<String, DLQRecord>> get() {
     return new OrderDiffTransformer(storeName, leftDurationMs, rightDurationMs);
   }
 

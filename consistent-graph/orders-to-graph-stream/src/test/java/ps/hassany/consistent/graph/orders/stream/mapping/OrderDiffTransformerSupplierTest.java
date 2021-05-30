@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
 import ps.hassany.consistent.graph.domain.DomainNode;
 import ps.hassany.consistent.graph.orders.Order;
+import ps.hassany.consistent.graph.orders.internal.DLQRecord;
 import ps.hassany.consistent.graph.orders.internal.OrderWithState;
 import ps.hassany.consistent.graph.orders.stream.OrderSerdes;
 import ps.hassany.consistent.graph.orders.stream.OrdersStreamingAppConfig;
@@ -39,6 +40,7 @@ public class OrderDiffTransformerSupplierTest {
   private Serde<Order> orderSerde;
   private Serde<DomainNode> nodeSerde;
   private Serde<OrderWithState> orderWithStateSerde;
+  private Serde<DLQRecord> dlqSerde;
   private StreamsBuilder builder;
 
   private Properties buildStreamsProperties(final OrdersStreamingAppConfig config) {
@@ -60,9 +62,10 @@ public class OrderDiffTransformerSupplierTest {
     Properties props = PropertiesClassPathLoader.loadProperties(TEST_CONFIG_FILE);
     appConfig = OrdersStreamingAppConfig.build(props);
     stringSerde = Serdes.String();
-    orderSerde = OrderSerdes.ordersSerde(appConfig);
-    nodeSerde = OrderSerdes.nodeSerde(appConfig);
-    orderWithStateSerde = OrderSerdes.orderWithStateSerde(appConfig);
+    orderSerde = OrderSerdes.serde(appConfig);
+    nodeSerde = OrderSerdes.serde(appConfig);
+    orderWithStateSerde = OrderSerdes.serde(appConfig);
+    dlqSerde = OrderSerdes.serde(appConfig);
 
     final StoreBuilder<WindowStore<String, Order>> ordersStoreBuilder =
         Stores.windowStoreBuilder(
@@ -73,27 +76,31 @@ public class OrderDiffTransformerSupplierTest {
     final var supplier = new OrderDiffTransformerSupplier(storeName, 100000, ordersStoreBuilder);
     builder = new StreamsBuilder();
     final KStream<String, Order> ordersStream = builder.stream(appConfig.getOrdersTopicName());
-    final KStream<String, OrderWithState> orderWithStateKStream = ordersStream.transform(supplier);
-    orderWithStateKStream.to(outTopicName, Produced.with(stringSerde, orderWithStateSerde));
+    final KStream<String, DLQRecord> orderWithStateKStream = ordersStream.transform(supplier);
+    orderWithStateKStream.to(outTopicName, Produced.with(stringSerde, dlqSerde));
   }
 
   @Test
   public void test_transformOneOrder() {
     long orderTimestamp = Clock.systemUTC().millis();
     var order1 = TestUtils.getOrder1(orderTimestamp);
+    var order1WithState = TestUtils.getOrder1CreateState(orderTimestamp);
     try (final TopologyTestDriver topologyTestDriver =
         new TopologyTestDriver(builder.build(), buildStreamsProperties(appConfig))) {
       final TestInputTopic<String, Order> input =
           topologyTestDriver.createInputTopic(
               appConfig.getOrdersTopicName(), stringSerde.serializer(), orderSerde.serializer());
 
-      final TestOutputTopic<String, OrderWithState> output =
+      final TestOutputTopic<String, DLQRecord> output =
           topologyTestDriver.createOutputTopic(
-              outTopicName, stringSerde.deserializer(), orderWithStateSerde.deserializer());
+              outTopicName, stringSerde.deserializer(), dlqSerde.deserializer());
       input.pipeInput(order1.getId(), order1);
-      var ret = output.readKeyValuesToList();
-      var orderWithState = TestUtils.getOrder1CreateState(orderTimestamp);
-      assertEquals(List.of(new KeyValue<>(orderWithState.getId(), orderWithState)), ret);
+      List<KeyValue<String, DLQRecord>> ret = output.readKeyValuesToList();
+
+      assertEquals(1, ret.size());
+      var dlqRecord =
+          TestUtils.wrapOrderStateInDLQ(order1WithState, ret.get(0).value.getTimestamp());
+      assertEquals(List.of(new KeyValue<>(dlqRecord.getOrderWithState().getId(), dlqRecord)), ret);
     }
   }
 
@@ -103,25 +110,30 @@ public class OrderDiffTransformerSupplierTest {
     long order2Timestamp = Clock.systemUTC().millis();
     var order1 = TestUtils.getOrder1(order1Timestamp);
     var order2 = TestUtils.getOrder2(order2Timestamp);
+    var order1WithState = TestUtils.getOrder1CreateState(order1Timestamp);
+    var order2WithState = TestUtils.getOrder2CreateState(order2Timestamp);
     try (final TopologyTestDriver topologyTestDriver =
         new TopologyTestDriver(builder.build(), buildStreamsProperties(appConfig))) {
       final TestInputTopic<String, Order> input =
           topologyTestDriver.createInputTopic(
               appConfig.getOrdersTopicName(), stringSerde.serializer(), orderSerde.serializer());
 
-      final TestOutputTopic<String, OrderWithState> output =
+      final TestOutputTopic<String, DLQRecord> output =
           topologyTestDriver.createOutputTopic(
-              outTopicName, stringSerde.deserializer(), orderWithStateSerde.deserializer());
+              outTopicName, stringSerde.deserializer(), dlqSerde.deserializer());
       input.pipeInput(order1.getId(), order1);
       input.pipeInput(order2.getId(), order2);
       var ret = output.readKeyValuesToList();
-      var order1WithState = TestUtils.getOrder1CreateState(order1Timestamp);
-      var order2WithState = TestUtils.getOrder2CreateState(order2Timestamp);
-      assertEquals(
+      assertEquals(2, ret.size());
+      var expected =
           List.of(
-              new KeyValue<>(order1WithState.getId(), order1WithState),
-              new KeyValue<>(order2WithState.getId(), order2WithState)),
-          ret);
+              new KeyValue<>(
+                  order1WithState.getId(),
+                  TestUtils.wrapOrderStateInDLQ(order1WithState, ret.get(0).value.getTimestamp())),
+              new KeyValue<>(
+                  order2WithState.getId(),
+                  TestUtils.wrapOrderStateInDLQ(order2WithState, ret.get(1).value.getTimestamp())));
+      assertEquals(expected, ret);
     }
   }
 
@@ -129,19 +141,31 @@ public class OrderDiffTransformerSupplierTest {
   public void test_transformDeleteBeforeCreate() {
     long orderTimestamp = Clock.systemUTC().millis();
     var order1 = TestUtils.getOrder1(orderTimestamp);
+
     try (final TopologyTestDriver topologyTestDriver =
         new TopologyTestDriver(builder.build(), buildStreamsProperties(appConfig))) {
       final TestInputTopic<String, Order> input =
           topologyTestDriver.createInputTopic(
               appConfig.getOrdersTopicName(), stringSerde.serializer(), orderSerde.serializer());
-      final TestOutputTopic<String, OrderWithState> output =
+      final TestOutputTopic<String, DLQRecord> output =
           topologyTestDriver.createOutputTopic(
-              outTopicName, stringSerde.deserializer(), orderWithStateSerde.deserializer());
+              outTopicName, stringSerde.deserializer(), dlqSerde.deserializer());
       input.pipeInput(order1.getId(), null);
       var ret = output.readKeyValuesToList();
-      var order1WithState = TestUtils.order1Deleted(orderTimestamp);
-      order1WithState.setOrderTimestamp(ret.get(0).value.getOrderTimestamp());
-      assertEquals(List.of(new KeyValue<>(order1WithState.getId(), order1WithState)), ret);
+      assertEquals(1, ret.size());
+      var order1WithState =
+          TestUtils.order1Deleted(ret.get(0).value.getOrderWithState().getOrderTimestamp());
+      var expected =
+          List.of(
+              new KeyValue<>(
+                  order1.getId(),
+                  DLQRecord.newBuilder()
+                      .setIsError(true)
+                      .setTimestamp(ret.get(0).value.getTimestamp())
+                      .setError(ret.get(0).value.getError())
+                      .setOrderWithState(order1WithState)
+                      .build()));
+      assertEquals(expected, ret);
     }
   }
 
@@ -156,18 +180,32 @@ public class OrderDiffTransformerSupplierTest {
       final TestInputTopic<String, Order> input =
           topologyTestDriver.createInputTopic(
               appConfig.getOrdersTopicName(), stringSerde.serializer(), orderSerde.serializer());
-      final TestOutputTopic<String, OrderWithState> output =
+      final TestOutputTopic<String, DLQRecord> output =
           topologyTestDriver.createOutputTopic(
-              outTopicName, stringSerde.deserializer(), orderWithStateSerde.deserializer());
+              outTopicName, stringSerde.deserializer(), dlqSerde.deserializer());
       input.pipeInput(order1.getId(), order1);
       input.pipeInput(order1.getId(), null);
       var ret = output.readKeyValuesToList();
-      var order1Deleted = TestUtils.order1DeletedChildren(ret.get(1).value.getOrderTimestamp());
-      assertEquals(
+      assertEquals(2, ret.size());
+      var order1Deleted =
+          TestUtils.order1DeletedChildren(ret.get(1).value.getOrderWithState().getOrderTimestamp());
+      var expected =
           List.of(
-              new KeyValue<>(order1Created.getId(), order1Created),
-              new KeyValue<>(order1Deleted.getId(), order1Deleted)),
-          ret);
+              new KeyValue<>(
+                  order1.getId(),
+                  DLQRecord.newBuilder()
+                      .setIsError(false)
+                      .setTimestamp(ret.get(0).value.getTimestamp())
+                      .setOrderWithState(order1Created)
+                      .build()),
+              new KeyValue<>(
+                  order1.getId(),
+                  DLQRecord.newBuilder()
+                      .setIsError(false)
+                      .setTimestamp(ret.get(1).value.getTimestamp())
+                      .setOrderWithState(order1Deleted)
+                      .build()));
+      assertEquals(expected, ret);
     }
   }
 }

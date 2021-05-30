@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OrderDiffTransformer
-    implements Transformer<String, Order, KeyValue<String, OrderWithState>> {
+    implements Transformer<String, Order, KeyValue<String, DLQRecord>> {
   private ProcessorContext context;
   private final String storeName;
   private WindowStore<String, Order> ordersWindowStore;
@@ -210,18 +210,21 @@ public class OrderDiffTransformer
   }
 
   @Override
-  public KeyValue<String, OrderWithState> transform(String key, Order order) {
+  public KeyValue<String, DLQRecord> transform(String key, Order order) {
     final long eventTimestamp = OrderTimestampExtractor.getOrderTimestamp(order);
     final var timeIterator =
         ordersWindowStore.fetch(
             key, eventTimestamp - leftDurationMs, eventTimestamp + rightDurationMs);
     OrderWithState orderWithState;
-    var hasNext = timeIterator.hasNext();
-    if (hasNext) {
+    boolean isError = false;
+    String error = null;
+    if (timeIterator.hasNext()) {
       orderWithState = orderDiff(timeIterator.next().value, order);
     } else if (order != null) {
       orderWithState = newOrder(order);
     } else {
+      isError = true;
+      error = "Deleting an order that didn't exists in the WindowedStore.";
       orderWithState =
           OrderWithState.newBuilder()
               .setState(OrderState.Deleted)
@@ -231,7 +234,14 @@ public class OrderDiffTransformer
               .build();
     }
     ordersWindowStore.put(key, order, eventTimestamp);
-    return new KeyValue<>(key, orderWithState);
+    return new KeyValue<>(
+        key,
+        DLQRecord.newBuilder()
+            .setIsError(isError)
+            .setError(error)
+            .setTimestamp(Clock.systemUTC().millis())
+            .setOrderWithState(orderWithState)
+            .build());
   }
 
   @Override

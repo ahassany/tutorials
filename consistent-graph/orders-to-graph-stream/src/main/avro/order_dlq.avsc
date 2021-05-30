@@ -1,0 +1,28 @@
+{
+  "namespace": "ps.hassany.consistent.graph.orders.internal",
+  "type": "record",
+  "name": "DLQRecord",
+  "fields": [
+    {
+      "name": "isError",
+      "type": "boolean"
+    },
+    {
+      "name": "error",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "orderWithState",
+      "type": "ps.hassany.consistent.graph.orders.internal.OrderWithState"
+    }
+  ]
+}

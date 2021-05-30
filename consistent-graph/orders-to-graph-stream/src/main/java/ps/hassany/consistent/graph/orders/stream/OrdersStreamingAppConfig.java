@@ -25,6 +25,10 @@ public class OrdersStreamingAppConfig {
   private final int ordersRelationsTopicPartitions;
   private final short ordersRelationsTopicReplicationFactor;
 
+  private final String ordersDLQTopicName;
+  private final int ordersDLQTopicPartitions;
+  private final short ordersDLQTopicReplicationFactor;
+
   public static OrdersStreamingAppConfig build(Properties props) throws IOException {
     final Properties kafkaProducerProperties =
         PropertiesClassPathLoader.loadProperties(
@@ -52,6 +56,12 @@ public class OrdersStreamingAppConfig {
     final short ordersRelationsTopicReplicationFactor =
         Short.parseShort(props.getProperty("orders.relations.topic.replication.factor"));
 
+    final String ordersDLQTopicName = props.getProperty("orders.dql.topic.name");
+    final int ordersDLQTopicPartitions =
+        Integer.parseInt(props.getProperty("orders.dql.topic.partitions"));
+    final short ordersDLQTopicReplicationFactor =
+        Short.parseShort(props.getProperty("orders.dql.topic.replication.factor"));
+
     return new OrdersStreamingAppConfig(
         kafkaProducerProperties,
         bootstrapServers,
@@ -65,6 +75,9 @@ public class OrdersStreamingAppConfig {
         ordersNodesTopicReplicationFactor,
         ordersRelationsTopicName,
         ordersRelationsTopicPartitions,
-        ordersRelationsTopicReplicationFactor);
+        ordersRelationsTopicReplicationFactor,
+        ordersDLQTopicName,
+        ordersDLQTopicPartitions,
+        ordersDLQTopicReplicationFactor);
   }
 }
