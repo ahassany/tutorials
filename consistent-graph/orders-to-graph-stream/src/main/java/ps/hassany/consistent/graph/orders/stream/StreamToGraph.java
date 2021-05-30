@@ -20,38 +20,10 @@ import ps.hassany.consistent.graph.orders.internal.OrderWithState;
 import ps.hassany.consistent.graph.orders.stream.mapping.OrderDiffTransformerSupplier;
 
 import java.time.Duration;
-import java.util.Map;
-
-import static io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG;
 
 public class StreamToGraph {
 
   private static final String ordersStoreName = "order-state-store";
-
-  private SpecificAvroSerde<Order> ordersSerde(final OrdersStreamingAppConfig appConfig) {
-    final SpecificAvroSerde<Order> serde = new SpecificAvroSerde<>();
-    Map<String, String> serdeConfig =
-        Map.of(SCHEMA_REGISTRY_URL_CONFIG, appConfig.getSchemaRegistryURL());
-    serde.configure(serdeConfig, false);
-    return serde;
-  }
-
-  private SpecificAvroSerde<DomainNode> nodeSerde(final OrdersStreamingAppConfig appConfig) {
-    final SpecificAvroSerde<DomainNode> serde = new SpecificAvroSerde<>();
-    Map<String, String> serdeConfig =
-        Map.of(SCHEMA_REGISTRY_URL_CONFIG, appConfig.getSchemaRegistryURL());
-    serde.configure(serdeConfig, false);
-    return serde;
-  }
-
-  private SpecificAvroSerde<DomainRelation> relationSerde(
-      final OrdersStreamingAppConfig appConfig) {
-    final SpecificAvroSerde<DomainRelation> serde = new SpecificAvroSerde<>();
-    Map<String, String> serdeConfig =
-        Map.of(SCHEMA_REGISTRY_URL_CONFIG, appConfig.getSchemaRegistryURL());
-    serde.configure(serdeConfig, false);
-    return serde;
-  }
 
   public Topology buildTopology(
       OrdersStreamingAppConfig config,
@@ -60,9 +32,9 @@ public class StreamToGraph {
           relationsMapper) {
     StreamsBuilder builder = new StreamsBuilder();
     final Serde<String> stringSerde = new Serdes.StringSerde();
-    final SpecificAvroSerde<Order> ordersSerde = ordersSerde(config);
-    final SpecificAvroSerde<DomainNode> nodeSerde = nodeSerde(config);
-    final SpecificAvroSerde<DomainRelation> relationSerde = relationSerde(config);
+    final SpecificAvroSerde<Order> ordersSerde = OrderSerdes.ordersSerde(config);
+    final SpecificAvroSerde<DomainNode> nodeSerde = OrderSerdes.nodeSerde(config);
+    final SpecificAvroSerde<DomainRelation> relationSerde = OrderSerdes.relationSerde(config);
 
     final Duration windowSize = Duration.ofMinutes(1);
     final Duration retentionPeriod = windowSize;
