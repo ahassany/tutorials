@@ -14,6 +14,8 @@ import ps.hassany.consistent.graph.orders.Order;
 import ps.hassany.consistent.graph.orders.OrderedItemType;
 import ps.hassany.consistent.graph.orders.internal.*;
 
+import java.time.Clock;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,7 +40,7 @@ public class OrderDiffTransformer
     ordersWindowStore = this.context.getStateStore(storeName);
   }
 
-  private OrderWithState newOrder(Order order) {
+  public OrderWithState newOrder(Order order) {
     return OrderWithState.newBuilder()
         .setState(OrderState.Created)
         .setId(order.getId())
@@ -87,7 +89,7 @@ public class OrderDiffTransformer
         .build();
   }
 
-  private BookOrderWithState bookToBookWithState(Book book, OrderState state) {
+  private BookOrderWithState bookToBookWithState(BookOrder book, OrderState state) {
     return BookOrderWithState.newBuilder()
         .setState(state)
         .setId(book.getId())
@@ -96,7 +98,7 @@ public class OrderDiffTransformer
         .build();
   }
 
-  private LaptopOrderWithState laptopToLaptopWithState(Laptop laptop, OrderState state) {
+  private LaptopOrderWithState laptopToLaptopWithState(LaptopOrder laptop, OrderState state) {
     return LaptopOrderWithState.newBuilder()
         .setState(state)
         .setId(laptop.getId())
@@ -107,14 +109,14 @@ public class OrderDiffTransformer
   private OrderedItem orderedItemToOrderedItemWithState(
       ps.hassany.consistent.graph.orders.OrderedItem orderedItem, OrderState state) {
     if (orderedItem.getItemType() == OrderedItemType.book) {
-      Book book = (Book) orderedItem.getDetails();
+      BookOrder book = (BookOrder) orderedItem.getDetails();
       return OrderedItem.newBuilder()
           .setItemType(ps.hassany.consistent.graph.orders.internal.OrderedItemType.book)
           .setPrice(orderedItem.getPrice())
           .setDetails(bookToBookWithState(book, state))
           .build();
     } else if (orderedItem.getItemType() == OrderedItemType.laptop) {
-      Laptop laptop = (Laptop) orderedItem.getDetails();
+      LaptopOrder laptop = (LaptopOrder) orderedItem.getDetails();
       return OrderedItem.newBuilder()
           .setItemType(ps.hassany.consistent.graph.orders.internal.OrderedItemType.laptop)
           .setPrice(orderedItem.getPrice())
@@ -138,7 +140,7 @@ public class OrderDiffTransformer
   private OrderWithState deleteOrder(Order oldOrder) {
     var orderWithSateBuilder =
         OrderWithState.newBuilder()
-            .setState(OrderState.Updated)
+            .setState(OrderState.Deleted)
             .setId(oldOrder.getId())
             .setOrderTimestamp(System.currentTimeMillis())
             .setCustomer(
@@ -209,15 +211,24 @@ public class OrderDiffTransformer
 
   @Override
   public KeyValue<String, OrderWithState> transform(String key, Order order) {
-    final long eventTimestamp = order.getOrderTimestamp();
+    final long eventTimestamp = OrderTimestampExtractor.getOrderTimestamp(order);
     final var timeIterator =
         ordersWindowStore.fetch(
             key, eventTimestamp - leftDurationMs, eventTimestamp + rightDurationMs);
     OrderWithState orderWithState;
-    if (timeIterator.hasNext()) {
+    var hasNext = timeIterator.hasNext();
+    if (hasNext) {
       orderWithState = orderDiff(timeIterator.next().value, order);
-    } else {
+    } else if (order != null) {
       orderWithState = newOrder(order);
+    } else {
+      orderWithState =
+          OrderWithState.newBuilder()
+              .setState(OrderState.Deleted)
+              .setId(key)
+              .setOrderTimestamp(Clock.systemUTC().millis())
+              .setOrderedItems(List.of())
+              .build();
     }
     ordersWindowStore.put(key, order, eventTimestamp);
     return new KeyValue<>(key, orderWithState);
