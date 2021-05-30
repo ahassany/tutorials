@@ -18,7 +18,11 @@
     },
     {
       "name": "customer",
-      "type": "ps.hassany.consistent.graph.orders.internal.CustomerOrderWithState"
+      "type": [
+        "null",
+        "ps.hassany.consistent.graph.orders.internal.CustomerOrderWithState"
+      ],
+      "default": null
     },
     {
       "name": "orderedItems",
