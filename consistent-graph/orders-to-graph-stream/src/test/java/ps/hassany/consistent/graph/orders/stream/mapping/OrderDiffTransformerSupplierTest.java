@@ -12,16 +12,12 @@ import org.apache.kafka.streams.state.WindowStore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
-import ps.hassany.consistent.graph.domain.DomainNode;
 import ps.hassany.consistent.graph.orders.Order;
 import ps.hassany.consistent.graph.orders.internal.DLQRecord;
-import ps.hassany.consistent.graph.orders.internal.OrderWithState;
 import ps.hassany.consistent.graph.orders.stream.OrderSerdes;
 import ps.hassany.consistent.graph.orders.stream.OrdersStreamingAppConfig;
 
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
@@ -33,13 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class OrderDiffTransformerSupplierTest {
   private static final String TEST_CONFIG_FILE = "test.properties";
   private final String outTopicName = "output-topic";
-  private static final Path STATE_DIR = Paths.get(System.getProperty("user.dir"), "build");
   private static final String storeName = "test-store";
   private OrdersStreamingAppConfig appConfig;
   private Serde<String> stringSerde;
   private Serde<Order> orderSerde;
-  private Serde<DomainNode> nodeSerde;
-  private Serde<OrderWithState> orderWithStateSerde;
   private Serde<DLQRecord> dlqSerde;
   private StreamsBuilder builder;
 
@@ -63,8 +56,6 @@ public class OrderDiffTransformerSupplierTest {
     appConfig = OrdersStreamingAppConfig.build(props);
     stringSerde = Serdes.String();
     orderSerde = OrderSerdes.serde(appConfig);
-    nodeSerde = OrderSerdes.serde(appConfig);
-    orderWithStateSerde = OrderSerdes.serde(appConfig);
     dlqSerde = OrderSerdes.serde(appConfig);
 
     final StoreBuilder<WindowStore<String, Order>> ordersStoreBuilder =
