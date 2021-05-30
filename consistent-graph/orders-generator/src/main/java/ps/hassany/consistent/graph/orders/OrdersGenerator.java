@@ -96,6 +96,7 @@ public class OrdersGenerator {
         .mapToObj(
             x -> {
               var order = newOrder(10, 100, 10, 2);
+              logger.info("Generated new order with id: " + order.getId());
               return kafkaProducer.send(
                   new ProducerRecord<>(appConfig.getOrdersTopicName(), order.getId(), order),
                   printCallback);
