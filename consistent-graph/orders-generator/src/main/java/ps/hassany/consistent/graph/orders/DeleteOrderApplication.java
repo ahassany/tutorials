@@ -43,7 +43,12 @@ public class DeleteOrderApplication {
     Producer<String, Order> producer = new KafkaProducer<>(appConfig.getKakfaProducerProperties());
 
     RandomSampling<String> rs = new ChaoSampling<>(numOrders, new Random());
-    rs.feed(ordersConsumer.poll().map(consumerRecord -> consumerRecord.key()).iterator());
+    rs.feed(
+        ordersConsumer
+            .poll()
+            .filter(consumerRecord -> consumerRecord.value() != null)
+            .map(consumerRecord -> consumerRecord.key())
+            .iterator());
     var sample = rs.sample();
 
     sample.forEach(
