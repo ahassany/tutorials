@@ -4,6 +4,7 @@ import lombok.Data;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Properties;
 
 @Data
@@ -12,6 +13,8 @@ public class OrdersStreamingAppConfig {
   private final String bootstrapServers;
   private final String applicationId;
   private final String schemaRegistryURL;
+
+  private final Duration stateStoreDuration;
 
   private final String ordersTopicName;
   private final int ordersTopicPartitions;
@@ -33,6 +36,8 @@ public class OrdersStreamingAppConfig {
     final String bootstrapServers = props.getProperty("bootstrap.servers");
     final String schemaRegistryURL = props.getProperty("schema.registry.url");
     final String applicationId = props.getProperty("application.id");
+
+    final Duration stateStoreDuration = Duration.parse(props.getProperty("state.store.duration"));
 
     final String ordersTopicName = props.getProperty("orders.topic.name");
     final int ordersTopicPartitions =
@@ -57,6 +62,7 @@ public class OrdersStreamingAppConfig {
         bootstrapServers,
         applicationId,
         schemaRegistryURL,
+        stateStoreDuration,
         ordersTopicName,
         ordersTopicPartitions,
         ordersTopicReplicationFactor,

@@ -35,7 +35,7 @@ public class StreamToGraph {
     final SpecificAvroSerde<DomainGraphRecord> recordSerde = OrderSerdes.serde(config);
     final SpecificAvroSerde<DLQRecord> dlqSerde = OrderSerdes.serde(config);
 
-    final Duration windowSize = Duration.ofMinutes(100);
+    final Duration windowSize = config.getStateStoreDuration();
     final Duration retentionPeriod = windowSize;
 
     final StoreBuilder<WindowStore<String, Order>> ordersStoreBuilder =
