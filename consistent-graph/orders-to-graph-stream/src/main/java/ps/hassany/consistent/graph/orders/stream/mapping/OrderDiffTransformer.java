@@ -6,8 +6,6 @@ import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.Transformer;
 import org.apache.kafka.streams.processor.ProcessorContext;
 import org.apache.kafka.streams.state.WindowStore;
-import ps.hassany.consistent.graph.graph.Book;
-import ps.hassany.consistent.graph.graph.Laptop;
 import ps.hassany.consistent.graph.orders.BookOrder;
 import ps.hassany.consistent.graph.orders.LaptopOrder;
 import ps.hassany.consistent.graph.orders.Order;
@@ -128,10 +126,10 @@ public class OrderDiffTransformer
 
   private String extractOrderedItemId(ps.hassany.consistent.graph.orders.OrderedItem orderedItem) {
     if (orderedItem.getItemType() == OrderedItemType.book) {
-      Book book = (Book) orderedItem.getDetails();
+      BookOrder book = (BookOrder) orderedItem.getDetails();
       return book.getId();
     } else if (orderedItem.getItemType() == OrderedItemType.laptop) {
-      Laptop laptop = (Laptop) orderedItem.getDetails();
+      LaptopOrder laptop = (LaptopOrder) orderedItem.getDetails();
       return laptop.getId();
     }
     return null;
