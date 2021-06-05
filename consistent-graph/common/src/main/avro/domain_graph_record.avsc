@@ -1,0 +1,25 @@
+{
+  "namespace": "ps.hassany.consistent.graph.domain",
+  "type": "record",
+  "name": "DomainGraphRecord",
+  "fields": [
+    {
+      "name": "payloadType",
+      "type": {
+        "name": "DomainContainerPayloadType",
+        "type": "enum",
+        "symbols": [
+          "DomainNode",
+          "DomainRelation"
+        ]
+      }
+    },
+    {
+      "name": "payload",
+      "type": [
+        "ps.hassany.consistent.graph.domain.DomainNode",
+        "ps.hassany.consistent.graph.domain.DomainRelation"
+      ]
+    }
+  ]
+}

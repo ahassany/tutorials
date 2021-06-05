@@ -1,12 +1,12 @@
 package ps.hassany.consistent.graph.orders.stream;
 
+import io.confluent.common.utils.TestUtils;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import ps.hassany.consistent.graph.common.PropertiesClassPathLoader;
-import ps.hassany.consistent.graph.orders.stream.mapping.MapOrderToNodes;
-import ps.hassany.consistent.graph.orders.stream.mapping.MapOrderToRelations;
+import ps.hassany.consistent.graph.orders.stream.mapping.MapOrderToGraphRecord;
 import ps.hassany.consistent.graph.orders.stream.mapping.OrderTimestampExtractor;
 
 import java.io.IOException;
@@ -26,9 +26,10 @@ public class OrdersStreamingApplication {
     streamConfig.put(
         StreamsConfig.DEFAULT_TIMESTAMP_EXTRACTOR_CLASS_CONFIG,
         OrderTimestampExtractor.class.getName());
-    // streamConfig.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getPath());
+    streamConfig.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getPath());
     streamConfig.put(StreamsConfig.CACHE_MAX_BYTES_BUFFERING_CONFIG, 0);
     // streamConfig.put(StreamsConfig.producerPrefix(ProducerConfig.BATCH_SIZE_CONFIG), 128);
+    //streamConfig.put(StreamsConfig.topicPrefix("PARAMETER_NAME"), "orders-stream-");
     return streamConfig;
   }
 
@@ -36,9 +37,8 @@ public class OrdersStreamingApplication {
     Properties props = PropertiesClassPathLoader.loadProperties("dev.properties");
     OrdersStreamingAppConfig config = OrdersStreamingAppConfig.build(props);
     StreamToGraph streamToGraph = new StreamToGraph();
-    MapOrderToNodes nodesMapper = new MapOrderToNodes();
-    MapOrderToRelations relationMapper = new MapOrderToRelations();
-    var topology = streamToGraph.buildTopology(config, nodesMapper, relationMapper);
+    MapOrderToGraphRecord recordsMapper = new MapOrderToGraphRecord();
+    var topology = streamToGraph.buildTopology(config, recordsMapper);
     Properties streamProps = buildStreamsProperties(config);
     final KafkaStreams streams = new KafkaStreams(topology, streamProps);
 

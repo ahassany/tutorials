@@ -7,8 +7,7 @@ import org.apache.kafka.clients.admin.AdminClient;
 import ps.hassany.consistent.graph.common.SchemaPublication;
 import ps.hassany.consistent.graph.common.TopicCreation;
 import ps.hassany.consistent.graph.common.TopicsCreationConfig;
-import ps.hassany.consistent.graph.domain.DomainNode;
-import ps.hassany.consistent.graph.domain.DomainRelation;
+import ps.hassany.consistent.graph.domain.DomainGraphRecord;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,11 +40,6 @@ public class Helpers {
                 appConfig.getOrdersNodesTopicName(),
                 appConfig.getOrdersNodesTopicPartitions(),
                 appConfig.getOrdersNodesTopicReplicationFactor(),
-                Optional.of(Map.of("cleanup.policy", "compact"))),
-            new TopicsCreationConfig(
-                appConfig.getOrdersRelationsTopicName(),
-                appConfig.getOrdersRelationsTopicPartitions(),
-                appConfig.getOrdersRelationsTopicReplicationFactor(),
                 Optional.of(Map.of("cleanup.policy", "compact"))));
     TopicCreation topicCreation = new TopicCreation(adminClient);
     topicCreation.createTopics(topicConfigs);
@@ -59,10 +53,7 @@ public class Helpers {
     schemaPublication.registerValueSchema(appConfig.getOrdersTopicName(), Order.SCHEMA$);
 
     schemaPublication.registerKeySchema(appConfig.getOrdersNodesTopicName(), stringSchema);
-    schemaPublication.registerValueSchema(appConfig.getOrdersNodesTopicName(), DomainNode.SCHEMA$);
-
-    schemaPublication.registerKeySchema(appConfig.getOrdersRelationsTopicName(), stringSchema);
     schemaPublication.registerValueSchema(
-        appConfig.getOrdersRelationsTopicName(), DomainRelation.SCHEMA$);
+        appConfig.getOrdersNodesTopicName(), DomainGraphRecord.SCHEMA$);
   }
 }
