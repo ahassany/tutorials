@@ -4,6 +4,8 @@ import io.vavr.Tuple;
 import io.vavr.Tuple2;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.kstream.KeyValueMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ps.hassany.consistent.graph.NodeState;
 import ps.hassany.consistent.graph.domain.*;
 import ps.hassany.consistent.graph.orders.internal.*;
@@ -21,6 +23,8 @@ import java.util.stream.Stream;
 public class MapOrderToGraphRecord
     implements KeyValueMapper<
         String, OrderWithState, Iterable<KeyValue<String, DomainGraphRecord>>> {
+
+  private static final Logger logger = LoggerFactory.getLogger(MapOrderToGraphRecord.class);
 
   private DomainGraphRecord getOrderRecord(OrderWithState order) {
     String orderId = OrderMappingUtils.getOrderId(order);
@@ -249,7 +253,11 @@ public class MapOrderToGraphRecord
     records.addAll(
         getRelationsRecords(value).stream().filter(Objects::nonNull).collect(Collectors.toList()));
 
-    records.forEach(x -> {System.err.println("Writing" + x);});
+    logger.trace("Mapped " + value.toString() + " to:");
+    records.forEach(
+        x -> {
+          logger.trace("Mapped value: \t" + x);
+        });
     return records;
   }
 }
