@@ -23,10 +23,6 @@ public class OrdersGeneratorAppConfig {
   private final int ordersNodesTopicPartitions;
   private final short ordersNodesTopicReplicationFactor;
 
-  private final String ordersRelationsTopicName;
-  private final int ordersRelationsTopicPartitions;
-  private final short ordersRelationsTopicReplicationFactor;
-
   public static OrdersGeneratorAppConfig build(Properties props) throws IOException {
     final Properties kafkaProducerProperties =
         PropertiesClassPathLoader.loadProperties(
@@ -55,12 +51,6 @@ public class OrdersGeneratorAppConfig {
     final short ordersNodesTopicReplicationFactor =
         Short.parseShort(props.getProperty("orders.nodes.topic.replication.factor"));
 
-    final String ordersRelationsTopicName = props.getProperty("orders.relations.topic.name");
-    final int ordersRelationsTopicPartitions =
-        Integer.parseInt(props.getProperty("orders.relations.topic.partitions"));
-    final short ordersRelationsTopicReplicationFactor =
-        Short.parseShort(props.getProperty("orders.relations.topic.replication.factor"));
-
     return new OrdersGeneratorAppConfig(
         kafkaProducerProperties,
         KafkaConsumerProperties,
@@ -72,9 +62,6 @@ public class OrdersGeneratorAppConfig {
         ordersTopicReplicationFactor,
         ordersNodesTopicName,
         ordersNodesTopicPartitions,
-        ordersNodesTopicReplicationFactor,
-        ordersRelationsTopicName,
-        ordersRelationsTopicPartitions,
-        ordersRelationsTopicReplicationFactor);
+        ordersNodesTopicReplicationFactor);
   }
 }

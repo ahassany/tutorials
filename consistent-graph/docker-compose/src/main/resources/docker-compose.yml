@@ -25,7 +25,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1.5G
     ports:
       - "29092:29092"
     environment:
@@ -48,7 +48,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:9092'
@@ -116,7 +116,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2G
+          memory: 1G
     environment:
       CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker:9092'
       CONTROL_CENTER_ZOOKEEPER_CONNECT: 'zookeeper:2181'

@@ -21,10 +21,6 @@ public class OrdersStreamingAppConfig {
   private final int ordersNodesTopicPartitions;
   private final short ordersNodesTopicReplicationFactor;
 
-  private final String ordersRelationsTopicName;
-  private final int ordersRelationsTopicPartitions;
-  private final short ordersRelationsTopicReplicationFactor;
-
   private final String ordersDLQTopicName;
   private final int ordersDLQTopicPartitions;
   private final short ordersDLQTopicReplicationFactor;
@@ -50,12 +46,6 @@ public class OrdersStreamingAppConfig {
     final short ordersNodesTopicReplicationFactor =
         Short.parseShort(props.getProperty("orders.nodes.topic.replication.factor"));
 
-    final String ordersRelationsTopicName = props.getProperty("orders.relations.topic.name");
-    final int ordersRelationsTopicPartitions =
-        Integer.parseInt(props.getProperty("orders.relations.topic.partitions"));
-    final short ordersRelationsTopicReplicationFactor =
-        Short.parseShort(props.getProperty("orders.relations.topic.replication.factor"));
-
     final String ordersDLQTopicName = props.getProperty("orders.dql.topic.name");
     final int ordersDLQTopicPartitions =
         Integer.parseInt(props.getProperty("orders.dql.topic.partitions"));
@@ -73,9 +63,6 @@ public class OrdersStreamingAppConfig {
         ordersNodesTopicName,
         ordersNodesTopicPartitions,
         ordersNodesTopicReplicationFactor,
-        ordersRelationsTopicName,
-        ordersRelationsTopicPartitions,
-        ordersRelationsTopicReplicationFactor,
         ordersDLQTopicName,
         ordersDLQTopicPartitions,
         ordersDLQTopicReplicationFactor);
