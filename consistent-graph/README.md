@@ -10,6 +10,9 @@ The orders can be changed.
 However, this topic is a Capture-Data-Change (CDC topic), producing full new order each time.
 So we have no way on the receiving end to know what have changed, hence we must do a diff with the latest state observed.
 
+More information are in the [Blog post](https://ahassany.medium.com/streaming-integration-events-to-graph-capture-data-change-cdc-events-bb1e528da5f6)
+
+
 ### Running the application
 
 1. Run docker-compose container with all the components.
